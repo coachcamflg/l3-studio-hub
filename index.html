@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="L3 Studio">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23111' width='100' height='100' rx='20'/><text x='50' y='62' text-anchor='middle' font-size='40' fill='%23a855f7'>L3</text></svg>">
+<title>L3 Studio Hub</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --purple: #a855f7;
+    --purple-dim: #7c3aed;
+    --purple-glow: rgba(168, 85, 247, 0.15);
+    --green: #22c55e;
+    --green-dim: #16a34a;
+    --green-glow: rgba(34, 197, 94, 0.12);
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --bg: #09090b;
+    --surface: #111118;
+    --surface-2: #18181f;
+    --surface-3: #1f1f28;
+    --border: #27272a;
+    --text: #fafafa;
+    --text-mid: #a1a1aa;
+    --text-dim: #71717a;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(17, 17, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-dim));
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; letter-spacing: -0.5px; color: white;
+    box-shadow: 0 2px 12px rgba(168, 85, 247, 0.3);
+  }
+  .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .header-subtitle { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.2px; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-clock {
+    font-size: 14px; color: var(--text-mid); font-weight: 600;
+    font-variant-numeric: tabular-nums; letter-spacing: 0.3px;
+  }
+
+  /* ── Navigation ── */
+  .nav-bar {
+    display: flex; gap: 4px; padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-btn {
+    flex-shrink: 0; padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .nav-btn.active { background: var(--purple); color: white; }
+  .nav-btn:not(.active):active { background: var(--surface-2); }
+
+  /* ── Screens ── */
+  .screen { display: none; padding: 20px 16px calc(40px + var(--safe-bottom)); }
+  .screen.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Home Screen ── */
+  .home-section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text-dim);
+    margin-bottom: 12px; padding-left: 4px;
+  }
+  .home-sessions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .session-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .session-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .session-card.studio::before { background: linear-gradient(90deg, var(--purple), var(--purple-dim)); }
+  .session-card.location::before { background: linear-gradient(90deg, var(--green), var(--green-dim)); }
+  .session-card:active { transform: scale(0.97); }
+  .session-card-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .session-card-icon svg { width: 22px; height: 22px; }
+  .session-card-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
+  .session-card-desc { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+
+  .home-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .tool-card:active { transform: scale(0.97); }
+  .tool-card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tool-card-icon svg { width: 20px; height: 20px; }
+  .tool-card-title { font-size: 14px; font-weight: 600; }
+
+  /* ── Session Setup ── */
+  .setup-type-banner {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-radius: 14px;
+    border: 1px solid; margin-bottom: 24px;
+    font-weight: 700; font-size: 15px;
+  }
+  .setup-type-banner svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .setup-section { margin-bottom: 24px; }
+  .setup-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .setup-options { display: flex; flex-wrap: wrap; gap: 10px; }
+  .setup-option {
+    padding: 14px 24px; border-radius: 14px;
+    border: 2px solid var(--border); background: var(--surface);
+    color: var(--text); font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    flex: 1; min-width: 120px; text-align: center;
+  }
+  .setup-option.selected {
+    border-color: var(--purple); background: var(--purple-glow); color: white;
+  }
+  .setup-input {
+    width: 100%; padding: 14px 18px;
+    border-radius: 14px; border: 2px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-size: 16px; font-weight: 500; outline: none;
+    transition: border-color 0.2s;
+  }
+  .setup-input:focus { border-color: var(--purple); }
+  .setup-input::placeholder { color: var(--text-dim); }
+
+  /* ── Contact Picker ── */
+  .contact-picker { position: relative; }
+  .contact-search-wrap { position: relative; }
+  .contact-search-clear {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: var(--surface-2); border: none; color: var(--text-dim);
+    font-size: 18px; width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; display: none; align-items: center; justify-content: center;
+  }
+  .contact-search-clear.visible { display: flex; }
+  .contact-list {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-top: 12px; max-height: 280px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .contact-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--surface);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .contact-item:active { transform: scale(0.98); }
+  .contact-item.selected { border-color: var(--purple); background: var(--purple-glow); }
+  .contact-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface-3);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: var(--purple);
+    flex-shrink: 0; overflow: hidden;
+  }
+  .contact-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name {
+    font-size: 15px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .contact-detail {
+    font-size: 12px; color: var(--text-dim);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .contact-tag {
+    font-size: 10px; font-weight: 700; padding: 3px 8px;
+    border-radius: 6px; background: rgba(168, 85, 247, 0.15);
+    color: var(--purple); flex-shrink: 0;
+  }
+  .contact-loading, .contact-empty {
+    text-align: center; padding: 24px; color: var(--text-dim); font-size: 14px;
+  }
+  .selected-contact-banner {
+    display: none; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 14px;
+    border: 2px solid var(--green-dim);
+    background: rgba(34, 197, 94, 0.08); margin-top: 12px;
+  }
+  .selected-contact-banner.visible { display: flex; }
+  .selected-contact-banner .contact-name { color: var(--green); }
+  .selected-contact-banner .btn-change {
+    margin-left: auto; background: none;
+    border: 1px solid var(--border); color: var(--text-dim);
+    padding: 6px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+
+  .camera-count {
+    display: flex; align-items: center; gap: 20px; justify-content: center;
+  }
+  .camera-count-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--surface);
+    color: var(--text); font-size: 24px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .camera-count-btn:active { background: var(--purple-glow); border-color: var(--purple); transform: scale(0.93); }
+  .camera-count-display {
+    font-size: 48px; font-weight: 800; width: 80px;
+    text-align: center; color: var(--purple);
+  }
+
+  .btn-primary {
+    width: 100%; padding: 18px; border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, var(--purple), var(--purple-dim));
+    color: white; font-size: 17px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; margin-top: 16px;
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25);
+  }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+  .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+
+  /* ── Checklist Screen ── */
+  .checklist-progress {
+    background: rgba(17, 17, 24, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    position: sticky; top: 63px; z-index: 50;
+  }
+  .progress-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-phase {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .progress-phase.studio-color { color: var(--purple); }
+  .progress-phase.location-color { color: var(--green); }
+  .progress-count { font-size: 13px; font-weight: 600; color: var(--text-dim); }
+  .progress-bar-bg {
+    width: 100%; height: 6px; background: var(--surface-3);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.4s ease; width: 0%;
+  }
+  .progress-bar-fill.studio-bar { background: linear-gradient(90deg, var(--purple), #c084fc); }
+  .progress-bar-fill.location-bar { background: linear-gradient(90deg, var(--green), #4ade80); }
+  .progress-session-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; font-size: 12px; color: var(--text-dim);
+  }
+  .progress-timer {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-mid); font-weight: 600;
+  }
+
+  .phase-block { margin-bottom: 6px; }
+  .phase-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.2s; margin-bottom: 2px;
+  }
+  .phase-header.completed { border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.04); }
+  .phase-header.current { border-color: var(--purple); background: var(--purple-glow); }
+  .phase-header.current.location-phase { border-color: var(--green); background: var(--green-glow); }
+  .phase-header-left { display: flex; align-items: center; gap: 12px; }
+  .phase-number {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface-2); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .phase-header.completed .phase-number {
+    background: var(--green); border-color: var(--green); color: white;
+  }
+  .phase-header.current .phase-number {
+    background: var(--purple); border-color: var(--purple); color: white;
+  }
+  .phase-header.current.location-phase .phase-number {
+    background: var(--green); border-color: var(--green);
+  }
+  .phase-name { font-size: 14px; font-weight: 600; }
+  .phase-status { font-size: 12px; color: var(--text-dim); font-weight: 600; }
+  .phase-items { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .phase-items.open { max-height: 3000px; }
+
+  .check-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 18px;
+    background: var(--surface); border: 1px solid var(--border); border-top: none;
+    cursor: pointer; transition: all 0.15s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .check-item:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+  .check-item:active { background: var(--surface-2); }
+  .check-item.checked { opacity: 0.45; }
+  .check-box {
+    width: 26px; height: 26px; border-radius: 8px;
+    border: 2px solid var(--border); display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; margin-top: 1px;
+  }
+  .check-item.checked .check-box { background: var(--green); border-color: var(--green); }
+  .check-mark { display: none; }
+  .check-item.checked .check-mark { display: block; }
+  .check-mark svg { width: 14px; height: 14px; }
+  .check-text { font-size: 14px; line-height: 1.55; flex: 1; }
+  .check-text strong { color: var(--purple); font-weight: 700; }
+  .check-text code {
+    background: var(--surface-3); padding: 2px 8px; border-radius: 6px;
+    font-size: 13px; color: var(--amber); font-family: 'SF Mono', monospace;
+  }
+  .check-sub {
+    display: block; font-size: 12px; color: var(--text-dim);
+    margin-top: 4px; line-height: 1.4;
+  }
+
+  .phase-condition {
+    padding: 10px 18px;
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    border-top: none;
+    font-size: 12px; color: var(--amber); font-weight: 600;
+  }
+
+  /* ── Complete Screen ── */
+  .complete-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 70vh;
+    text-align: center; padding: 40px 20px;
+  }
+  .complete-icon {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);
+    animation: pulse-in 0.5s ease;
+  }
+  .complete-icon svg { width: 40px; height: 40px; color: white; }
+  @keyframes pulse-in {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .complete-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .complete-sub { font-size: 15px; color: var(--text-dim); margin-bottom: 28px; }
+  .complete-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    width: 100%; max-width: 360px; margin-bottom: 28px;
+  }
+  .complete-stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+  }
+  .complete-stat-value { font-size: 22px; font-weight: 800; color: var(--purple); }
+  .complete-stat-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Location-mode accent override ── */
+  .check-text.location-accent strong { color: var(--green); }
+
+  /* ── Quick Ref ── */
+  .ref-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 16px;
+  }
+  .ref-section-title {
+    padding: 12px 16px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-dim); background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .ref-table { width: 100%; border-collapse: collapse; }
+  .ref-table tr { border-bottom: 1px solid var(--border); }
+  .ref-table tr:last-child { border-bottom: none; }
+  .ref-table td { padding: 12px 16px; font-size: 14px; }
+  .ref-table td:first-child { color: var(--text-dim); font-weight: 600; width: 42%; }
+  .ref-table td:last-child {
+    color: var(--text); font-weight: 600;
+    font-family: 'SF Mono', monospace; font-size: 13px;
+  }
+
+  /* ── Troubleshoot ── */
+  .trouble-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+  }
+  .trouble-q {
+    padding: 16px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  }
+  .trouble-chevron {
+    transition: transform 0.2s; color: var(--text-dim); flex-shrink: 0; margin-left: 12px;
+  }
+  .trouble-chevron svg { width: 16px; height: 16px; }
+  .trouble-card.open .trouble-chevron { transform: rotate(180deg); }
+  .trouble-a { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .trouble-card.open .trouble-a { max-height: 500px; }
+  .trouble-a-inner {
+    padding: 0 18px 16px; font-size: 13px;
+    line-height: 1.6; color: var(--text-dim);
+    border-top: 1px solid var(--border); padding-top: 14px;
+  }
+  .trouble-a-inner ol, .trouble-a-inner ul { padding-left: 20px; margin-top: 6px; }
+  .trouble-a-inner li { margin-bottom: 6px; }
+  .trouble-a-inner strong { color: var(--text-mid); }
+
+  /* ── History ── */
+  .history-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    margin-bottom: 8px;
+  }
+  .history-item-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+  }
+  .history-item-client { font-size: 15px; font-weight: 700; }
+  .history-item-badges { display: flex; gap: 6px; align-items: center; }
+  .history-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 8px;
+    border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .history-badge.studio { background: var(--purple-glow); color: var(--purple); }
+  .history-badge.location { background: var(--green-glow); color: var(--green); }
+  .history-badge.rate-full { background: rgba(34, 197, 94, 0.1); color: var(--green); }
+  .history-badge.rate-partial { background: rgba(245, 158, 11, 0.1); color: var(--amber); }
+  .history-item-meta {
+    font-size: 12px; color: var(--text-dim); display: flex;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .history-item-meta span { display: flex; align-items: center; gap: 4px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+  .empty-state-icon { margin-bottom: 16px; opacity: 0.25; }
+  .empty-state-icon svg { width: 48px; height: 48px; }
+
+  .screen-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.3px; }
+
+  /* ── Confirm modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+    z-index: 200; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px 24px; max-width: 360px; width: 100%;
+    text-align: center;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .modal-desc { font-size: 14px; color: var(--text-dim); margin-bottom: 24px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-btn {
+    flex: 1; padding: 14px; border-radius: 14px; border: none;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  .modal-btn.cancel { background: var(--surface-3); color: var(--text-mid); }
+  .modal-btn.confirm { background: var(--green); color: white; }
+</style>
+</head>
+<body>
+
+<!-- SVG icon defs (hidden) -->
+<svg style="display:none">
+  <symbol id="icon-studio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+  </symbol>
+  <symbol id="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+  </symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2m-9-11h2m18 0h2m-4.22-5.78 1.42-1.42m-15.56 0 1.42 1.42m0 11.32-1.42 1.42m15.56 0-1.42-1.42"/>
+  </symbol>
+  <symbol id="icon-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+  </symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+  <symbol id="icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </symbol>
+  <symbol id="icon-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>
+  </symbol>
+</svg>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">L3</div>
+    <div>
+      <div class="header-title">Studio Hub</div>
+      <div class="header-subtitle">L3 Media Production</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-clock" id="clock"></div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="showScreen('home')">Home</button>
+  <button class="nav-btn" onclick="showScreen('quick-ref')">Quick Ref</button>
+  <button class="nav-btn" onclick="showScreen('troubleshoot')">Troubleshoot</button>
+  <button class="nav-btn" onclick="showScreen('history')">History</button>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Complete Session?</div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Go Back</button>
+      <button class="modal-btn confirm" id="modal-confirm-btn" onclick="closeModal(); completeSession();">Complete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ HOME ════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-section-label">Start a Session</div>
+  <div class="home-sessions" style="grid-template-columns: 1fr 1fr 1fr;">
+    <div class="session-card studio" onclick="startSession('in-studio')">
+      <div class="session-card-icon" style="background: var(--purple-glow); color: var(--purple);">
+        <svg><use href="#icon-studio"/></svg>
+      </div>
+      <div class="session-card-title">In-Studio</div>
+      <div class="session-card-desc">Settings, verification, and key steps only.</div>
+    </div>
+    <div class="session-card studio" onclick="startSession('training')" style="border-color: rgba(168,85,247,0.25);">
+      <div class="session-card-icon" style="background: var(--purple-glow); color: var(--purple);">
+        <svg><use href="#icon-clipboard"/></svg>
+      </div>
+      <div class="session-card-title">Training</div>
+      <div class="session-card-desc">Full step-by-step for new producers.</div>
+    </div>
+    <div class="session-card location" onclick="startSession('on-location')">
+      <div class="session-card-icon" style="background: var(--green-glow); color: var(--green);">
+        <svg><use href="#icon-location"/></svg>
+      </div>
+      <div class="session-card-title">On-Location</div>
+      <div class="session-card-desc">Pack, setup, record, teardown.</div>
+    </div>
+  </div>
+  <div class="home-section-label">Tools</div>
+  <div class="home-tools">
+    <div class="tool-card" onclick="showScreen('quick-ref')">
+      <div class="tool-card-icon" style="background: rgba(245,158,11,0.1); color: var(--amber);">
+        <svg><use href="#icon-settings"/></svg>
+      </div>
+      <div class="tool-card-title">Quick Ref</div>
+    </div>
+    <div class="tool-card" onclick="showScreen('troubleshoot')">
+      <div class="tool-card-icon" style="background: rgba(239,68,68,0.1); color: var(--red);">
+        <svg><use href="#icon-wrench"/></svg>
+      </div>
+      <div class="tool-card-title">Troubleshoot</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SETUP ════════ -->
+<div id="screen-setup" class="screen">
+  <div class="setup-type-banner" id="setup-type-banner">
+    <span id="setup-type-icon"></span>
+    <span id="setup-type-label"></span>
+  </div>
+
+  <div class="setup-section">
+    <div class="setup-label">Producer on Duty</div>
+    <div class="setup-options" id="producer-options">
+      <button class="setup-option" onclick="selectProducer(this, 'Cam')">Cam</button>
+      <button class="setup-option" onclick="selectProducer(this, 'Percy')">Percy</button>
+    </div>
+  </div>
+
+  <div class="setup-section">
+    <div class="setup-label">Client</div>
+    <div class="contact-picker" id="contact-picker">
+      <div class="contact-search-wrap">
+        <input class="setup-input" id="client-search" type="text" placeholder="Search contacts..." autocomplete="off">
+        <button class="contact-search-clear" id="search-clear" onclick="clearContactSearch()">&times;</button>
+      </div>
+      <div class="selected-contact-banner" id="selected-banner">
+        <div class="contact-avatar" id="selected-avatar"></div>
+        <div class="contact-name" id="selected-name"></div>
+        <button class="btn-change" onclick="changeContact()">Change</button>
+      </div>
+      <div class="contact-list" id="contact-list">
+        <div class="contact-loading">Loading studio clients...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-section">
+    <div class="setup-label">Session Name (optional)</div>
+    <input class="setup-input" id="session-name" type="text" placeholder="e.g., Mind Our Business Podcast — Ep 12">
+  </div>
+
+  <div class="setup-section">
+    <div class="setup-label">Number of Cameras</div>
+    <div class="camera-count">
+      <button class="camera-count-btn" onclick="adjustCameras(-1)">-</button>
+      <div class="camera-count-display" id="camera-count">2</div>
+      <button class="camera-count-btn" onclick="adjustCameras(1)">+</button>
+    </div>
+  </div>
+
+  <div class="setup-section">
+    <div class="setup-label">Number of Guests</div>
+    <div class="camera-count">
+      <button class="camera-count-btn" onclick="adjustGuests(-1)">-</button>
+      <div class="camera-count-display" id="guest-count">1</div>
+      <button class="camera-count-btn" onclick="adjustGuests(1)">+</button>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="begin-btn" onclick="beginChecklist()" disabled>Begin Checklist</button>
+</div>
+
+<!-- ════════ CHECKLIST ════════ -->
+<div id="screen-checklist" class="screen">
+  <div class="checklist-progress">
+    <div class="progress-header">
+      <span class="progress-phase" id="current-phase-label">Phase 1 of 14</span>
+      <span class="progress-count" id="progress-count">0 / 0</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="progress-session-info">
+      <span id="session-producer"></span>
+      <span class="progress-timer" id="session-timer">0:00</span>
+      <span id="session-client"></span>
+    </div>
+  </div>
+  <div id="phases-container"></div>
+  <div id="checklist-actions" style="display:flex; gap:10px; margin-top:16px;">
+    <button id="abort-btn" style="padding:16px 20px; border-radius:14px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); font-size:14px; font-weight:600; cursor:pointer; transition: all 0.2s;" onclick="abortSession()">Cancel</button>
+    <button class="btn-primary" id="complete-btn" style="display:none; flex:1; margin-top:0; background: linear-gradient(135deg, var(--green), var(--green-dim)); box-shadow: 0 4px 20px rgba(34,197,94,0.25);" onclick="tryComplete()">Complete Session</button>
+  </div>
+</div>
+
+<!-- ════════ COMPLETE ════════ -->
+<div id="screen-complete" class="screen">
+  <div class="complete-screen">
+    <div class="complete-icon"><svg><use href="#icon-check"/></svg></div>
+    <div class="complete-title">Session Complete</div>
+    <div class="complete-sub" id="complete-sub">All checks passed</div>
+    <div class="complete-stats">
+      <div class="complete-stat">
+        <div class="complete-stat-value" id="stat-items">0</div>
+        <div class="complete-stat-label">Items Checked</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-value" id="stat-time">0m</div>
+        <div class="complete-stat-label">Time Taken</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-value" id="stat-skipped">0</div>
+        <div class="complete-stat-label">Skipped</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-value" id="stat-cameras">0</div>
+        <div class="complete-stat-label">Cameras</div>
+      </div>
+    </div>
+    <button class="btn-primary" style="max-width:360px;" onclick="resetToHome()">Back to Home</button>
+  </div>
+</div>
+
+<!-- ════════ QUICK REF ════════ -->
+<div id="screen-quick-ref" class="screen">
+  <div class="screen-title">Quick Reference</div>
+  <div class="ref-section">
+    <div class="ref-section-title">Voice Commands</div>
+    <table class="ref-table">
+      <tr><td>Studio ON</td><td>"Echo, turn on studio"</td></tr>
+      <tr><td>Studio OFF</td><td>"Echo, turn off studio"</td></tr>
+    </table>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-title">Display</div>
+    <table class="ref-table">
+      <tr><td>Studio TV</td><td>HDMI 1</td></tr>
+      <tr><td>Producer TV</td><td>HDMI 2</td></tr>
+    </table>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-title">Camera Settings</div>
+    <table class="ref-table">
+      <tr><td>Shutter Speed</td><td>1/50</td></tr>
+      <tr><td>File Format</td><td>XAVC SHD</td></tr>
+      <tr><td>Record Setting</td><td>24p at 50 Mbps</td></tr>
+      <tr><td>Output</td><td>1080p</td></tr>
+    </table>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-title">Audio & Software</div>
+    <table class="ref-table">
+      <tr><td>Audio Sample Rate</td><td>48 kHz</td></tr>
+      <tr><td>Riverside Mic</td><td>RODECaster Multi-Track</td></tr>
+      <tr><td>Fan Setting</td><td>2 (black btn 2x)</td></tr>
+    </table>
+  </div>
+  <div class="ref-section">
+    <div class="ref-section-title">Access</div>
+    <table class="ref-table">
+      <tr><td>Laptop Password</td><td>l3mediastudio</td></tr>
+      <tr><td>Extra Power Blocks</td><td>Blue bin, closet by kitchen</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ════════ TROUBLESHOOT ════════ -->
+<div id="screen-troubleshoot" class="screen">
+  <div class="screen-title">Troubleshooting</div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Mic not picking up audio<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ol>
+        <li>Click the light-up button on the RODECaster channel for that mic</li>
+        <li>Switch from <strong>Condenser</strong> to <strong>Dynamic</strong> (or vice versa)</li>
+        <li>Switch it back — this usually resolves the issue</li>
+        <li>If still dead, check the XLR cable connection at both ends</li>
+        <li>Try a different XLR cable from the equipment closet</li>
+      </ol>
+    </div></div>
+  </div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Riverside showing 720p instead of 1080p<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ol>
+        <li>Go to Riverside <strong>Settings &rarr; Recording</strong></li>
+        <li>Verify video quality is set to <strong>Highest available (4K option)</strong> — it outputs 1080p</li>
+        <li>Check that the RODECaster Video is connected via the <strong>gray cable to Output 1</strong></li>
+        <li>If still 720p, disconnect and reconnect the gray cable</li>
+        <li>Restart Riverside if the issue persists</li>
+      </ol>
+    </div></div>
+  </div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Camera feed not showing in Riverside<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ol>
+        <li>Confirm the Hollyland transmitter is powered on and paired to the camera</li>
+        <li>Check that the camera is turned on and the lens cap is removed</li>
+        <li>Verify the camera's HDMI output is set to <strong>1080p</strong></li>
+        <li>Try unplugging and re-plugging the Hollyland transmitter</li>
+        <li>If using 5+ cameras, check Input 5 adapter connection</li>
+      </ol>
+    </div></div>
+  </div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Camera overheating<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ul>
+        <li>If recording 4K internally, switch cameras to <strong>output 1080p</strong> to reduce heat</li>
+        <li>Ensure fans are running on <strong>setting 2</strong> and pointed at cameras</li>
+        <li>Check that cameras are plugged into <strong>white USB-C cables</strong> from power blocks</li>
+        <li>If a camera overheats mid-session, power it off for 2 minutes then restart</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Stream Deck not working<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ul>
+        <li>Check USB connection to the MacBook Pro</li>
+        <li>If disconnected, open Riverside manually from the browser instead</li>
+        <li>Stream Deck shortcuts are convenience features — everything can be done manually</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Studio TV or Producer TV not turning on<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ol>
+        <li>Confirm the <strong>"Echo, turn on studio"</strong> voice command was recognized</li>
+        <li>Stand directly in front of the TV and try the Roku remote manually</li>
+        <li>Check that the TV is plugged into a powered outlet (controlled by Echo)</li>
+        <li>If the outlet is dead, check other Echo-controlled outlets — may need to re-issue voice command</li>
+      </ol>
+    </div></div>
+  </div>
+
+  <div class="trouble-card" onclick="this.classList.toggle('open')">
+    <div class="trouble-q">Where are extra power blocks / cables?<span class="trouble-chevron"><svg><use href="#icon-chevron"/></svg></span></div>
+    <div class="trouble-a"><div class="trouble-a-inner">
+      <ul>
+        <li>Extra power blocks: <strong>blue bin in the closet next to the kitchenette</strong></li>
+        <li>USB-C to USB adapters are also in the blue bin</li>
+        <li>For recordings outside the studio, use <strong>floor plugs</strong> to power equipment</li>
+      </ul>
+    </div></div>
+  </div>
+</div>
+
+<!-- ════════ HISTORY ════════ -->
+<div id="screen-history" class="screen">
+  <div class="screen-title">Session History</div>
+  <div id="history-list">
+    <div class="empty-state">
+      <div class="empty-state-icon"><svg><use href="#icon-clipboard"/></svg></div>
+      <p>No sessions logged yet.</p>
+      <p style="margin-top: 8px; font-size: 13px;">Completed checklists will appear here.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let selectedProducer = null;
+let selectedContact = null;
+let sessionType = 'in-studio';
+let cameraCount = 2;
+let guestCount = 1;
+let sessionStartTime = null;
+let checkStates = {};
+let totalItems = 0;
+let searchTimeout = null;
+let studioClients = [];
+let timerInterval = null;
+
+const GHL_WEBHOOK_URL = '/.netlify/functions/log-session';
+const SEARCH_URL = '/.netlify/functions/search-contacts';
+
+// ── Clock ──
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// ── Elapsed Timer ──
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (!sessionStartTime) return;
+    const s = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    const el = document.getElementById('session-timer');
+    if (el) el.textContent = m + ':' + String(sec).padStart(2, '0');
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); }
+
+// ── Navigation ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const labels = { home: 'Home', 'quick-ref': 'Quick Ref', troubleshoot: 'Troubleshoot', history: 'History', setup: 'Home', checklist: 'Home', complete: 'Home' };
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.textContent === labels[id]) b.classList.add('active');
+  });
+  if (id === 'history') renderHistory();
+  if (id === 'home') { stopTimer(); sessionStartTime = null; }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetToHome() {
+  selectedProducer = null;
+  selectedContact = null;
+  sessionStartTime = null;
+  cameraCount = 2;
+  guestCount = 1;
+  checkStates = {};
+  stopTimer();
+  showScreen('home');
+}
+
+function abortSession() {
+  const checked = Object.values(checkStates).filter(Boolean).length;
+  if (checked > 0) {
+    document.getElementById('modal-title').textContent = 'Cancel session?';
+    document.getElementById('modal-desc').textContent = 'You\'ve checked ' + checked + ' item' + (checked > 1 ? 's' : '') + '. Progress will be lost.';
+    document.getElementById('modal-confirm-btn').textContent = 'Cancel Session';
+    document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); resetToHome(); };
+    document.getElementById('confirm-modal').classList.add('open');
+  } else {
+    resetToHome();
+  }
+}
+
+// ── Contact Picker ──
+async function loadStudioClients() {
+  const list = document.getElementById('contact-list');
+  try {
+    const res = await fetch(`${SEARCH_URL}?tagged=studio-client`);
+    const data = await res.json();
+    studioClients = data.contacts || [];
+    renderContactList(studioClients, true);
+  } catch {
+    list.innerHTML = '<div class="contact-empty">Could not load contacts</div>';
+  }
+}
+
+function renderContactList(contacts, isDefault) {
+  const list = document.getElementById('contact-list');
+  if (contacts.length === 0) {
+    list.innerHTML = isDefault
+      ? '<div class="contact-empty">No studio clients found.<br>Search by name above.</div>'
+      : '<div class="contact-empty">No matches found</div>';
+    return;
+  }
+  list.innerHTML = contacts.map(c => {
+    const initials = c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const avatar = c.photo
+      ? `<img src="${c.photo}" alt="" onerror="this.parentElement.textContent='${initials}'">`
+      : initials;
+    const detail = c.email || c.phone || '';
+    const isStudio = c.tags?.includes('studio-client');
+    return `<div class="contact-item${selectedContact?.id === c.id ? ' selected' : ''}" onclick='pickContact(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+      <div class="contact-avatar">${avatar}</div>
+      <div class="contact-info">
+        <div class="contact-name">${c.name}</div>
+        ${detail ? `<div class="contact-detail">${detail}</div>` : ''}
+      </div>
+      ${isStudio ? '<span class="contact-tag">Studio</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function pickContact(contact) {
+  selectedContact = contact;
+  const initials = contact.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('selected-name').textContent = contact.name;
+  const avatarEl = document.getElementById('selected-avatar');
+  avatarEl.innerHTML = contact.photo
+    ? `<img src="${contact.photo}" alt="" onerror="this.parentElement.textContent='${initials}'">`
+    : initials;
+  document.getElementById('selected-banner').classList.add('visible');
+  document.getElementById('contact-list').style.display = 'none';
+  document.getElementById('client-search').style.display = 'none';
+  document.getElementById('search-clear').classList.remove('visible');
+  updateBeginBtn();
+}
+
+function changeContact() {
+  selectedContact = null;
+  document.getElementById('selected-banner').classList.remove('visible');
+  document.getElementById('contact-list').style.display = '';
+  document.getElementById('client-search').style.display = '';
+  document.getElementById('client-search').value = '';
+  renderContactList(studioClients, true);
+  updateBeginBtn();
+}
+
+function clearContactSearch() {
+  document.getElementById('client-search').value = '';
+  document.getElementById('search-clear').classList.remove('visible');
+  renderContactList(studioClients, true);
+}
+
+function onContactSearch(e) {
+  const q = e.target.value.trim();
+  document.getElementById('search-clear').classList.toggle('visible', q.length > 0);
+  if (!q) { renderContactList(studioClients, true); return; }
+  const localMatches = studioClients.filter(c => c.name.toLowerCase().includes(q.toLowerCase()));
+  if (localMatches.length > 0) {
+    renderContactList(localMatches, false);
+  } else {
+    document.getElementById('contact-list').innerHTML = '<div class="contact-loading">Searching...</div>';
+  }
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(`${SEARCH_URL}?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      const seen = new Set();
+      const merged = [];
+      for (const c of [...localMatches, ...(data.contacts || [])]) {
+        if (!seen.has(c.id)) { seen.add(c.id); merged.push(c); }
+      }
+      renderContactList(merged, false);
+    } catch {}
+  }, 300);
+}
+document.getElementById('client-search')?.addEventListener('input', onContactSearch);
+
+// ── Session Setup ──
+function startSession(type) {
+  sessionType = type || 'in-studio';
+  showScreen('setup');
+  selectedProducer = null;
+  selectedContact = null;
+  document.querySelectorAll('#producer-options .setup-option').forEach(b => b.classList.remove('selected'));
+  document.getElementById('client-search').value = '';
+  document.getElementById('client-search').style.display = '';
+  document.getElementById('search-clear').classList.remove('visible');
+  document.getElementById('selected-banner').classList.remove('visible');
+  document.getElementById('contact-list').style.display = '';
+  document.getElementById('session-name').value = '';
+  document.getElementById('camera-count').textContent = '2';
+  document.getElementById('guest-count').textContent = '1';
+  cameraCount = 2;
+  guestCount = 1;
+  const isLoc = sessionType === 'on-location';
+  const isTraining = sessionType === 'training';
+  const banner = document.getElementById('setup-type-banner');
+  const typeLabels = { 'in-studio': 'In-Studio Session', 'training': 'In-Studio Training', 'on-location': 'On-Location Shoot' };
+  const typeIcons = { 'in-studio': 'studio', 'training': 'clipboard', 'on-location': 'location' };
+  document.getElementById('setup-type-label').textContent = typeLabels[sessionType];
+  document.getElementById('setup-type-icon').innerHTML = `<svg style="width:20px;height:20px"><use href="#icon-${typeIcons[sessionType]}"/></svg>`;
+  banner.style.borderColor = isLoc ? 'var(--green)' : 'var(--purple)';
+  banner.style.background = isLoc ? 'var(--green-glow)' : 'var(--purple-glow)';
+  banner.style.color = isLoc ? 'var(--green)' : 'var(--purple)';
+  loadStudioClients();
+  updateBeginBtn();
+}
+
+function selectProducer(el, name) {
+  selectedProducer = name;
+  document.querySelectorAll('#producer-options .setup-option').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  updateBeginBtn();
+}
+
+function adjustCameras(delta) {
+  cameraCount = Math.max(1, Math.min(6, cameraCount + delta));
+  document.getElementById('camera-count').textContent = cameraCount;
+}
+
+function adjustGuests(delta) {
+  guestCount = Math.max(1, Math.min(8, guestCount + delta));
+  document.getElementById('guest-count').textContent = guestCount;
+}
+
+function updateBeginBtn() {
+  document.getElementById('begin-btn').disabled = !(selectedProducer && selectedContact);
+}
+
+// ── Checklist Data ──
+function buildPhases() {
+  if (sessionType === 'on-location') return buildLocationPhases();
+  if (sessionType === 'training') return buildTrainingPhases();
+  return buildStandardPhases();
+}
+
+function buildStandardPhases() {
+  return [
+    {
+      name: 'Studio & Display',
+      items: [
+        'Power on studio — confirm both TVs on',
+        'Set <strong>Studio TV → HDMI 1</strong>, <strong>Producer TV → HDMI 2</strong>',
+        'Set up <strong>client backdrop</strong> if applicable'
+      ]
+    },
+    {
+      name: 'Riverside Session',
+      items: [
+        'Create <strong>New Studio</strong> in Riverside — name the session',
+        'Verify <strong>Settings → Recording:</strong><span class="check-sub">Audio: 48 kHz · Video: Highest (4K→1080p) · Countdown: OFF</span>',
+        'Select <strong>"RODECaster Multi-Track"</strong> as mic input',
+        'Confirm resolution shows <strong>1080p</strong> (not 720p)'
+      ]
+    },
+    {
+      name: 'Audio Setup',
+      items: [
+        'Connect <strong>RODECaster Video</strong> to MacBook — <strong>gray cable → Output 1</strong>',
+        ...(guestCount >= 3 ? ['Connect <strong>RODECaster Pro</strong> to Input/Output 2 on RODECaster Video'] : []),
+        'Connect <strong>Shure mics via XLR</strong>' + (guestCount >= 3 ? ' (RODECaster Video + Pro)' : ''),
+        '<strong>Tap-test every mic</strong> — confirm audio in Riverside and RODECaster'
+      ]
+    },
+    {
+      name: 'Cameras',
+      items: [
+        'Power on <strong>' + cameraCount + ' Sony ZV-E10</strong> — remove lens caps',
+        'Verify each camera: <strong>Shutter 1/50 · XAVC SHD · 24p 50M · 1080p output</strong>',
+        'Insert <strong>memory cards</strong> if recording 4K backup',
+        'Attach <strong>Hollyland transmitters</strong> — confirm all feeds in Riverside at <strong>1080p</strong>',
+        ...(cameraCount >= 5 ? ['<strong>5th camera:</strong> adapter on RODECaster Video Input 5'] : []),
+        ...(cameraCount >= 6 ? ['<strong>6th camera:</strong> smartphone via Riverside app'] : []),
+        'Confirm all cameras on <strong>USB-C power</strong>'
+      ]
+    },
+    {
+      name: 'Fans & Peripherals',
+      items: [
+        'Fans plugged in — <strong>setting 2</strong> (black button 2x)',
+        'Position fans toward cameras'
+      ]
+    },
+    {
+      name: 'Pre-Record Check',
+      items: [
+        '<strong>Video:</strong> All camera feeds visible in Riverside',
+        '<strong>Audio:</strong> All mics registering levels',
+        '<strong>Resolution:</strong> All feeds at 1080p',
+        '<strong>Power:</strong> All devices plugged in, no warnings',
+        '<strong>Lighting:</strong> Positioned correctly',
+        '<strong>Backdrop:</strong> Displaying if applicable',
+        '<strong>Test recording:</strong> 5-second clip — check for flicker or choppiness'
+      ]
+    },
+    {
+      name: 'Record',
+      items: [
+        'Talent seated, mics live, cameras framed',
+        'Hit <strong>Record</strong> in Riverside',
+        'Hit <strong>Record</strong> on RODECaster Video (turns <strong>red</strong>)',
+        'Confirm <strong>duration counter</strong> is running',
+        'Enable <strong>auto camera transition</strong> if desired'
+      ]
+    },
+    {
+      name: 'During Recording',
+      items: [
+        'Monitor live feed on <strong>Roku TV</strong>',
+        'Watch for dropped feeds, audio issues, or overheating',
+        'Do <strong>NOT</strong> close or sleep MacBook'
+      ]
+    },
+    {
+      name: 'Wrap & Shutdown',
+      items: [
+        'Stop recording in <strong>Riverside first</strong>',
+        'Stop recording on <strong>RODECaster Video</strong>',
+        '<strong>Wait for Riverside upload confirmation</strong> before shutdown',
+        'Power off studio — cameras, RODECaster' + (guestCount >= 3 ? 's' : '') + ', MacBook, lights',
+        'Unplug <strong>fans</strong> (prevent LED burnout)',
+        'Replace <strong>lens caps</strong> — pull memory cards if needed',
+        'Return gear to positions'
+      ]
+    }
+  ];
+}
+
+function buildTrainingPhases() {
+  return [
+    {
+      name: 'Studio Power-Up',
+      items: [
+        'Say <strong>"Echo, turn on studio"</strong> to power on TVs, lights, and all outlets',
+        'Confirm the studio TV and producer TV both turned on',
+        'Grab the Roku remote — set <strong>Studio TV to HDMI 1</strong>',
+        'Set <strong>Producer TV to HDMI 2</strong>',
+        'Stand directly in front of each TV when switching inputs to ensure the correct one updates'
+      ]
+    },
+    {
+      name: 'Client Backdrop',
+      condition: 'If client has a custom backdrop',
+      items: [
+        'Open the <strong>Backdrops app</strong> on the studio TV or via browser',
+        'Log in (credentials on file)',
+        'Navigate to the <strong>Client Logos</strong> folder',
+        'Select the correct client logo',
+        'Click <strong>"Start Backdrops"</strong> — confirm logo displays on the in-studio TV'
+      ]
+    },
+    {
+      name: 'Computer Setup',
+      items: [
+        'Open the <strong>MacBook Pro</strong> (password: <code>l3mediastudio</code>)',
+        'Press the <strong>"Riverside"</strong> button on the Stream Deck to launch Riverside<span class="check-sub">If Stream Deck is not plugged in, open Riverside manually from the browser</span>',
+        'Click <strong>"Log In"</strong> (top right) — credentials auto-fill after selecting the email field',
+        'Click <strong>"New Studio"</strong>',
+        'Name the session (e.g., "' + (selectedContact?.name || 'Client') + ' — ' + new Date().toLocaleDateString() + '")',
+        'Go to <strong>Settings → Recording</strong> and verify:<span class="check-sub">Audio: 48 kHz · Video: Highest (4K→1080p) · Countdown: OFF</span>'
+      ]
+    },
+    {
+      name: 'RODECaster Video Setup',
+      items: [
+        'Press the <strong>red power button</strong> on the back of the RODECaster Video',
+        'Connect RODECaster Video to MacBook Pro — <strong>gray cable → Output 1</strong>',
+        'In Riverside, select <strong>"RODECaster Multi-Track"</strong> as the microphone input',
+        'Confirm on-screen resolution shows <strong>1080p</strong><span class="check-sub">If showing 720p, recheck Settings → Recording</span>'
+      ]
+    },
+    {
+      name: 'RODECaster Pro Setup',
+      condition: guestCount >= 3 ? 'Required — 3+ guests detected' : 'Only needed for 3+ person sessions',
+      items: [
+        'Turn on the <strong>RODECaster Pro</strong> (for additional mic channels)',
+        'Plug the RODECaster Pro into <strong>Input/Output 2</strong> on the RODECaster Video',
+        'Confirm additional mic channels are recognized'
+      ]
+    },
+    {
+      name: 'Microphone Setup',
+      items: [
+        'Connect <strong>Shure mics via XLR</strong> to the RODECaster Video' + (guestCount >= 3 ? ' (and RODECaster Pro)' : ''),
+        'Label each mic position: <strong>Mic 1' + (guestCount >= 2 ? ', Mic 2' : '') + (guestCount >= 3 ? ', Mic 3' : '') + '</strong>, etc.',
+        'Place mics at their marked positions on set',
+        '<strong>Tap-test every mic</strong> — confirm audio registers on screen<span class="check-sub">If a mic is dead: click the RODECaster channel button → switch Condenser ↔ Dynamic → switch back</span>'
+      ]
+    },
+    {
+      name: 'Camera Setup',
+      items: [
+        'Turn on all <strong>' + cameraCount + ' Sony ZV-E10</strong> camera' + (cameraCount > 1 ? 's' : ''),
+        'Remove lens caps → place on the designated tray',
+        'Set each camera: Shutter <strong>1/50</strong> (dial wheel)',
+        'Menu → Camera Menu 2: <strong>XAVC SHD</strong> · <strong>24p at 50 Mbps</strong>',
+        'If recording 4K internally, set cameras to <strong>output 1080p</strong>',
+        'Insert <strong>memory cards</strong> if recording 4K internally as backup',
+        'Position cameras at their labeled marks'
+      ]
+    },
+    {
+      name: 'Hollyland Wireless',
+      items: [
+        'Attach a <strong>Hollyland transmitter</strong> to each Sony ZV-E10',
+        'Power on each transmitter',
+        'Confirm each camera feed appears in Riverside on the MacBook',
+        'Verify all video feeds show <strong>1080p</strong> resolution'
+      ]
+    },
+    ...(cameraCount >= 5 ? [{
+      name: 'Extended Camera Setup',
+      condition: cameraCount + ' cameras configured',
+      items: [
+        '<strong>5th camera:</strong> Use the adapter on RODECaster Video <strong>Input 5</strong>',
+        ...(cameraCount >= 6 ? ['<strong>6th camera:</strong> Use a smartphone with the <strong>Riverside app</strong> for wide-angle<span class="check-sub">Phone streams directly to Riverside — no additional hardware needed</span>'] : []),
+        'If using 6 cameras via RODECaster Video, unplug RODECaster Pro and ensure an <strong>SD card is inserted</strong> for independent audio',
+        'Note: Audio for cameras beyond 4 may mix into a single channel unless recorded separately'
+      ]
+    }] : []),
+    {
+      name: 'Power & Peripherals',
+      items: [
+        'Confirm all cameras plugged into <strong>white USB-C cables</strong> from power blocks',
+        'Confirm fans are plugged in (power block — <strong>bottom right outlet</strong>)',
+        'Press the <strong>black button on back of each fan twice</strong> until indicator shows "2"',
+        'If short on USB-C ports, use a <strong>USB-C to USB adapter</strong>'
+      ]
+    },
+    {
+      name: 'Pre-Record Verification',
+      items: [
+        '<strong>Video check:</strong> Every camera feed displays correctly in Riverside',
+        '<strong>Audio check:</strong> Tap-test every mic — confirm levels in Riverside and RODECaster',
+        '<strong>Resolution check:</strong> All feeds showing 1080p',
+        '<strong>Settings check:</strong> ISO, shutter 1/50, XAVC SHD, 24p 50M',
+        '<strong>Power check:</strong> All devices plugged in, no overheating warnings',
+        '<strong>Fan check:</strong> All fans running on setting 2',
+        '<strong>Lighting check:</strong> Studio lights on and positioned correctly',
+        '<strong>Backdrop check:</strong> Client logo or backdrop displaying (if applicable)',
+        'Do a <strong>5-second test recording</strong> — play back to check for flickering or choppy footage'
+      ]
+    },
+    {
+      name: 'Start Recording',
+      items: [
+        'Confirm talent is seated, mics are live, cameras are framed',
+        'Click <strong>"Record"</strong> in Riverside',
+        'Press <strong>Record</strong> on the RODECaster Video (button turns <strong>red</strong>)',
+        'Confirm recording duration counter is running on screen',
+        '<strong>Auto camera transition:</strong> Press auto mode button for automatic speaker switching<span class="check-sub">Manual button exits auto mode — press auto again to re-enable. Hold to change transition style.</span>'
+      ]
+    },
+    {
+      name: 'During Recording',
+      items: [
+        'Monitor the Roku TV for the live feed',
+        'Watch for any dropped camera feeds or audio issues',
+        'Keep an eye on recording duration and device temperatures',
+        'Do <strong>NOT</strong> close or sleep the MacBook Pro'
+      ]
+    },
+    {
+      name: 'End Recording & Shutdown',
+      items: [
+        'Stop recording in <strong>Riverside</strong> first',
+        'Stop recording on the <strong>RODECaster Video</strong>',
+        '<strong>Wait for Riverside to confirm all files are uploaded</strong> before doing anything else',
+        'Say <strong>"Echo, turn off studio"</strong> to power down TVs, lights, and outlets',
+        'Manually turn off all <strong>Sony ZV-E10 cameras</strong>',
+        'Press the power button on the <strong>RODECaster Video</strong> to shut it down',
+        ...(guestCount >= 3 ? ['Turn off the <strong>RODECaster Pro</strong>'] : []),
+        'Unplug fans (they stay on until power is removed — prevent LED burnout)',
+        'Shut down the <strong>MacBook Pro</strong>',
+        'Turn off any remaining lights',
+        'Remove <strong>memory cards</strong> and <strong>hard drives</strong> as needed',
+        'Replace <strong>lens caps</strong> on all cameras',
+        'Return any borrowed power blocks to the <strong>blue bin</strong>'
+      ]
+    }
+  ];
+}
+
+function buildLocationPhases() {
+  return [
+    {
+      name: 'Gear Inventory & Packing',
+      items: [
+        '<strong>MacBook Pro</strong> + charger',
+        '<strong>RODECaster Video</strong> + power cable + gray output cable',
+        ...(guestCount >= 3 ? ['<strong>RODECaster Pro</strong> + power cable'] : []),
+        '<strong>' + cameraCount + ' Sony ZV-E10</strong> camera' + (cameraCount > 1 ? 's' : '') + ' + chargers',
+        '<strong>' + cameraCount + ' Hollyland transmitter' + (cameraCount > 1 ? 's' : '') + '</strong> (one per camera)',
+        '<strong>Shure XLR microphones</strong> (' + Math.max(guestCount + 1, 2) + ') + XLR cables',
+        '<strong>Tripods / camera mounts</strong> (' + cameraCount + ')',
+        '<strong>Mic stands / boom arms</strong> as needed',
+        '<strong>Memory cards</strong> — one per camera + spares',
+        '<strong>Power blocks</strong> + USB-C cables (one per camera)<span class="check-sub">Extra blocks in the blue bin, closet by kitchenette</span>',
+        '<strong>Extension cords / power strips</strong> (at least 2)',
+        '<strong>Fans</strong> — pack if indoor location without good airflow',
+        '<strong>Lighting kit</strong> — portable LED panels + stands',
+        '<strong>Gaffer tape</strong> — for securing cables on location',
+        'Verify all batteries are <strong>fully charged</strong> before leaving'
+      ]
+    },
+    {
+      name: 'Location Arrival & Scout',
+      items: [
+        'Identify <strong>power outlets</strong> — confirm they are live<span class="check-sub">If no wall outlets, use floor plugs or bring a portable battery station</span>',
+        'Assess <strong>ambient noise</strong> — HVAC, traffic, foot traffic, echo<span class="check-sub">Close doors/windows if possible. Note any unavoidable noise sources.</span>',
+        'Assess <strong>natural lighting</strong> — window direction, shadows, color temperature',
+        'Identify the <strong>best shooting area</strong> — background, depth, sight lines',
+        'Check <strong>Wi-Fi availability</strong> — needed for Riverside upload<span class="check-sub">If no Wi-Fi, use phone hotspot or plan for manual file transfer after</span>',
+        'Plan <strong>camera positions</strong> — mark with tape if needed',
+        'Confirm <strong>talent seating / standing positions</strong>',
+        'Clear the area of distractions — signs, clutter, reflective surfaces'
+      ]
+    },
+    {
+      name: 'Power & Cable Setup',
+      items: [
+        'Run <strong>extension cords</strong> from outlets to the shooting area',
+        'Set up <strong>power strips</strong> — one near cameras, one near audio/computer',
+        'Tape down all cables with <strong>gaffer tape</strong> to prevent tripping',
+        'Plug in <strong>power blocks</strong> and connect USB-C to each camera position',
+        'If using fans, position and plug in now'
+      ]
+    },
+    {
+      name: 'Computer & Riverside Setup',
+      items: [
+        'Set up <strong>MacBook Pro</strong> on a stable surface, plugged into power',
+        'Connect to <strong>Wi-Fi</strong> or hotspot',
+        'Open <strong>Riverside</strong> from the browser (no Stream Deck on location)',
+        'Click <strong>"Log In"</strong> — credentials auto-fill after selecting the email field',
+        'Click <strong>"New Studio"</strong>',
+        'Name the session (e.g., "' + (selectedContact?.name || 'Client') + ' — On-Location — ' + new Date().toLocaleDateString() + '")',
+        'Go to <strong>Settings → Recording</strong> and verify:<span class="check-sub">Audio: 48 kHz · Video: Highest (4K→1080p) · Countdown: OFF</span>'
+      ]
+    },
+    {
+      name: 'RODECaster Video Setup',
+      items: [
+        'Position RODECaster Video on a <strong>stable, flat surface</strong> near the MacBook',
+        'Connect power cable and turn on (press <strong>red power button</strong> on back)',
+        'Connect to MacBook Pro — <strong>gray cable → Output 1</strong>',
+        'In Riverside, select <strong>"RODECaster Multi-Track"</strong> as the microphone input',
+        'Confirm on-screen resolution shows <strong>1080p</strong>'
+      ]
+    },
+    ...(guestCount >= 3 ? [{
+      name: 'RODECaster Pro Setup',
+      condition: 'Required — 3+ guests',
+      items: [
+        'Position and power on the <strong>RODECaster Pro</strong>',
+        'Connect to <strong>Input/Output 2</strong> on the RODECaster Video',
+        'Confirm additional mic channels are recognized'
+      ]
+    }] : []),
+    {
+      name: 'Microphone Setup',
+      items: [
+        'Set up <strong>mic stands</strong> at each talent position',
+        'Connect <strong>Shure mics via XLR</strong> to the RODECaster Video' + (guestCount >= 3 ? ' (and RODECaster Pro)' : ''),
+        'Route XLR cables cleanly — <strong>tape down</strong> any cables crossing walkways',
+        '<strong>Tap-test every mic</strong> — confirm audio registers on screen<span class="check-sub">If a mic is dead: click the RODECaster channel button → switch Condenser ↔ Dynamic → switch back</span>',
+        'Check for <strong>ambient noise pickup</strong> — adjust mic positioning if needed'
+      ]
+    },
+    {
+      name: 'Camera Setup',
+      items: [
+        'Mount all <strong>' + cameraCount + ' Sony ZV-E10</strong> camera' + (cameraCount > 1 ? 's' : '') + ' on tripods',
+        'Remove lens caps → store in gear bag (not loose on location)',
+        'Set each camera: Shutter <strong>1/50</strong> (dial wheel)',
+        'Menu → Camera Menu 2: <strong>XAVC SHD</strong> · <strong>24p at 50 Mbps</strong>',
+        'Set cameras to <strong>output 1080p</strong>',
+        'Insert <strong>memory cards</strong> in all cameras — recording to card as backup',
+        'Frame each shot — check <strong>background, headroom, eye line</strong>',
+        'Connect cameras to <strong>USB-C power</strong> from power blocks'
+      ]
+    },
+    {
+      name: 'Hollyland Wireless',
+      items: [
+        'Attach a <strong>Hollyland transmitter</strong> to each camera',
+        'Power on each transmitter',
+        'Confirm each camera feed appears in Riverside on the MacBook',
+        'Verify all video feeds show <strong>1080p</strong> resolution',
+        'Check for <strong>wireless interference</strong> — if feed drops, reposition transmitter or reduce distance'
+      ]
+    },
+    {
+      name: 'Lighting Setup',
+      items: [
+        'Set up <strong>portable LED panels</strong> on stands',
+        'Position <strong>key light</strong> — 45 degrees from talent, slightly above eye level',
+        'Add <strong>fill light</strong> opposite the key to reduce harsh shadows',
+        'Check for <strong>mixed color temperatures</strong> — match LEDs to ambient light (daylight ~5600K / tungsten ~3200K)',
+        'Watch for <strong>reflections and glare</strong> on glasses, screens, or shiny surfaces',
+        'Adjust until talent is evenly lit without harsh shadows on the background'
+      ]
+    },
+    {
+      name: 'Pre-Record Verification',
+      items: [
+        '<strong>Video check:</strong> Every camera feed displays correctly in Riverside',
+        '<strong>Audio check:</strong> Tap-test every mic — confirm levels in Riverside and RODECaster',
+        '<strong>Resolution check:</strong> All feeds showing 1080p',
+        '<strong>Settings check:</strong> ISO, shutter 1/50, XAVC SHD, 24p 50M',
+        '<strong>Power check:</strong> All devices plugged in, batteries not draining',
+        '<strong>Lighting check:</strong> Even lighting, no harsh shadows, no flicker',
+        '<strong>Environment check:</strong> Background clean, no distractions, ambient noise minimal',
+        '<strong>Wi-Fi check:</strong> Connection stable for Riverside upload',
+        'Do a <strong>5-second test recording</strong> — play back to check for flickering, noise, or audio issues'
+      ]
+    },
+    {
+      name: 'Start Recording',
+      items: [
+        'Confirm talent is in position, mics are live, cameras are framed',
+        'Click <strong>"Record"</strong> in Riverside',
+        'Press <strong>Record</strong> on the RODECaster Video (button turns <strong>red</strong>)',
+        'Confirm recording duration counter is running',
+        'Verify <strong>memory cards are recording</strong> on each camera (backup)',
+        '<strong>Auto camera transition:</strong> Press auto mode button for automatic speaker switching<span class="check-sub">Manual button exits auto mode — press auto again to re-enable</span>'
+      ]
+    },
+    {
+      name: 'During Recording',
+      items: [
+        'Monitor camera feeds on the <strong>MacBook / RODECaster screen</strong>',
+        'Watch for <strong>dropped camera feeds</strong> or audio issues',
+        'Monitor <strong>device temperatures</strong> — cameras run hotter without studio fans',
+        'Watch for <strong>environmental changes</strong> — lighting shifts, noise interruptions, people walking through',
+        'Do <strong>NOT</strong> close or sleep the MacBook Pro',
+        'Keep an eye on <strong>power block battery levels</strong> if not plugged into wall'
+      ]
+    },
+    {
+      name: 'End Recording',
+      items: [
+        'Stop recording in <strong>Riverside</strong> first',
+        'Stop recording on the <strong>RODECaster Video</strong>',
+        'Stop recording on <strong>each camera</strong> (memory card backup)',
+        '<strong>Wait for Riverside to confirm all files are uploaded</strong> before packing<span class="check-sub">If Wi-Fi is slow, leave MacBook connected until upload completes — do not shut down</span>'
+      ]
+    },
+    {
+      name: 'Teardown & Pack',
+      items: [
+        'Power off all <strong>Sony ZV-E10 cameras</strong>',
+        'Replace <strong>lens caps</strong> on all cameras',
+        'Remove cameras from tripods → pack in cases/bags',
+        'Power off <strong>RODECaster Video</strong>' + (guestCount >= 3 ? ' and <strong>RODECaster Pro</strong>' : ''),
+        'Disconnect and coil all <strong>XLR cables</strong>',
+        'Disconnect and coil all <strong>power cables and extensions</strong>',
+        'Break down <strong>tripods, mic stands, light stands</strong>',
+        'Remove all <strong>gaffer tape</strong> from the floor and surfaces',
+        'Pack all <strong>Hollyland transmitters</strong>',
+        'Collect all <strong>memory cards</strong> — account for every one',
+        'Pack <strong>power blocks, USB-C cables, adapters</strong>',
+        'Shut down <strong>MacBook Pro</strong> (only after Riverside upload is confirmed)'
+      ]
+    },
+    {
+      name: 'Location Walkthrough & Return',
+      items: [
+        '<strong>Walk the entire location</strong> — check for any left-behind gear<span class="check-sub">Check under tables, behind furniture, and in corners</span>',
+        'Verify the space is <strong>clean and restored</strong> to how you found it',
+        'Do a <strong>gear count</strong> against the packing list — nothing missing',
+        'Load gear into vehicle — <strong>cameras and MacBook secured</strong> (not loose)',
+        'Return to studio — <strong>unload all gear</strong>',
+        'Return equipment to <strong>designated studio positions</strong>',
+        'Plug cameras and power blocks in to <strong>charge for next session</strong>',
+        'Return any extra power blocks to the <strong>blue bin</strong>'
+      ]
+    }
+  ];
+}
+
+// ── Render Checklist ──
+function beginChecklist() {
+  if (!selectedProducer || !selectedContact) return;
+  const clientName = selectedContact.name;
+  const sessionLabel = document.getElementById('session-name').value.trim() || clientName;
+
+  sessionStartTime = Date.now();
+  checkStates = {};
+  startTimer();
+
+  const phases = buildPhases();
+  const isLoc = sessionType === 'on-location';
+  const colorClass = isLoc ? 'location' : 'studio';
+
+  document.getElementById('session-producer').textContent = selectedProducer;
+  document.getElementById('session-client').textContent = sessionLabel;
+  document.getElementById('session-timer').textContent = '0:00';
+
+  const phaseLabel = document.getElementById('current-phase-label');
+  phaseLabel.className = 'progress-phase ' + colorClass + '-color';
+  document.getElementById('progress-bar').className = 'progress-bar-fill ' + colorClass + '-bar';
+
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+
+  let globalIdx = 0;
+  phases.forEach((phase, pi) => {
+    const isFirst = pi === 0;
+    const block = document.createElement('div');
+    block.className = 'phase-block';
+    block.innerHTML = `
+      <div class="phase-header ${isFirst ? 'current' + (isLoc ? ' location-phase' : '') : ''}" onclick="togglePhase(${pi})" id="phase-header-${pi}">
+        <div class="phase-header-left">
+          <div class="phase-number">${pi + 1}</div>
+          <div class="phase-name">${phase.name}</div>
+        </div>
+        <div class="phase-status" id="phase-status-${pi}">0/${phase.items.length}</div>
+      </div>
+      ${phase.condition ? `<div class="phase-condition" id="phase-condition-${pi}">${phase.condition}</div>` : ''}
+      <div class="phase-items ${isFirst ? 'open' : ''}" id="phase-items-${pi}">
+        ${phase.items.map((item, ii) => {
+          const idx = globalIdx++;
+          return `<div class="check-item" id="check-${idx}" onclick="toggleCheck(${idx}, ${pi}, ${phase.items.length})">
+            <div class="check-box"><span class="check-mark"><svg><use href="#icon-check"/></svg></span></div>
+            <div class="check-text${isLoc ? ' location-accent' : ''}">${item}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(block);
+  });
+
+  totalItems = globalIdx;
+  updateProgress();
+  showScreen('checklist');
+}
+
+function togglePhase(pi) {
+  document.getElementById('phase-items-' + pi).classList.toggle('open');
+}
+
+function toggleCheck(idx, phaseIdx, phaseTotal) {
+  checkStates[idx] = !checkStates[idx];
+  document.getElementById('check-' + idx).classList.toggle('checked', checkStates[idx]);
+  updateProgress();
+  updatePhaseStatus(phaseIdx, phaseTotal);
+}
+
+function updatePhaseStatus(phaseIdx, phaseTotal) {
+  const phases = buildPhases();
+  let offset = 0;
+  for (let i = 0; i < phaseIdx; i++) offset += phases[i].items.length;
+  let checked = 0;
+  for (let i = 0; i < phaseTotal; i++) { if (checkStates[offset + i]) checked++; }
+
+  document.getElementById('phase-status-' + phaseIdx).textContent = checked + '/' + phaseTotal;
+  const headerEl = document.getElementById('phase-header-' + phaseIdx);
+  const isLoc = sessionType === 'on-location';
+  headerEl.classList.remove('completed', 'current', 'location-phase');
+  if (checked === phaseTotal) {
+    headerEl.classList.add('completed');
+    const nextItems = document.getElementById('phase-items-' + (phaseIdx + 1));
+    const nextHeader = document.getElementById('phase-header-' + (phaseIdx + 1));
+    if (nextItems && !nextItems.classList.contains('open')) {
+      nextItems.classList.add('open');
+      if (nextHeader) { nextHeader.classList.add('current'); if (isLoc) nextHeader.classList.add('location-phase'); }
+      setTimeout(() => nextHeader?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    }
+  } else if (checked > 0) {
+    headerEl.classList.add('current');
+    if (isLoc) headerEl.classList.add('location-phase');
+  }
+}
+
+function updateProgress() {
+  const checked = Object.values(checkStates).filter(Boolean).length;
+  const pct = totalItems > 0 ? (checked / totalItems * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = checked + ' / ' + totalItems;
+
+  const phases = buildPhases();
+  let currentPhase = 1, offset = 0;
+  for (let i = 0; i < phases.length; i++) {
+    let all = true;
+    for (let j = 0; j < phases[i].items.length; j++) { if (!checkStates[offset + j]) { all = false; break; } }
+    offset += phases[i].items.length;
+    if (all) currentPhase = i + 2;
+  }
+  document.getElementById('current-phase-label').textContent = 'Phase ' + Math.min(currentPhase, phases.length) + ' of ' + phases.length;
+  document.getElementById('complete-btn').style.display = checked >= totalItems * 0.8 ? 'block' : 'none';
+}
+
+// ── Complete Session ──
+function tryComplete() {
+  const checked = Object.values(checkStates).filter(Boolean).length;
+  const skipped = totalItems - checked;
+  if (skipped > 0) {
+    document.getElementById('modal-title').textContent = 'Complete with ' + skipped + ' skipped?';
+    document.getElementById('modal-desc').textContent = skipped + ' item' + (skipped > 1 ? 's were' : ' was') + ' not checked off. Complete anyway?';
+    document.getElementById('confirm-modal').classList.add('open');
+  } else {
+    completeSession();
+  }
+}
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  // Reset modal to default complete behavior
+  const confirmBtn = document.getElementById('modal-confirm-btn');
+  confirmBtn.textContent = 'Complete';
+  confirmBtn.onclick = () => { closeModal(); completeSession(); };
+}
+
+function completeSession() {
+  stopTimer();
+  const checked = Object.values(checkStates).filter(Boolean).length;
+  const skipped = totalItems - checked;
+  const elapsed = Math.round((Date.now() - sessionStartTime) / 60000);
+  const clientName = selectedContact?.name || 'Unknown';
+  const sessionLabel = document.getElementById('session-name')?.value.trim() || clientName;
+
+  document.getElementById('stat-items').textContent = checked;
+  document.getElementById('stat-time').textContent = elapsed + 'm';
+  document.getElementById('stat-skipped').textContent = skipped;
+  document.getElementById('stat-skipped').style.color = skipped > 0 ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('stat-cameras').textContent = cameraCount;
+  document.getElementById('complete-sub').textContent = skipped === 0 ? 'All checks passed — you\'re good to go' : skipped + ' item' + (skipped > 1 ? 's' : '') + ' skipped';
+
+  const history = JSON.parse(localStorage.getItem('l3-studio-history') || '[]');
+  const record = {
+    id: Date.now(),
+    producer: selectedProducer,
+    client: clientName,
+    session: sessionLabel,
+    contactId: selectedContact?.id || null,
+    sessionType: ({ 'in-studio': 'In-Studio', 'training': 'Training', 'on-location': 'On-Location' }[sessionType] || 'In-Studio'),
+    cameras: cameraCount,
+    guests: guestCount,
+    itemsChecked: checked,
+    totalItems: totalItems,
+    skipped: skipped,
+    duration: elapsed,
+    timestamp: new Date().toISOString(),
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  };
+  history.unshift(record);
+  localStorage.setItem('l3-studio-history', JSON.stringify(history.slice(0, 100)));
+
+  if (GHL_WEBHOOK_URL) {
+    fetch(GHL_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        producer: selectedProducer,
+        client: clientName,
+        contactId: selectedContact?.id || null,
+        session_type: ({ 'in-studio': 'In-Studio', 'training': 'Training', 'on-location': 'On-Location' }[sessionType] || 'In-Studio'),
+        cameras: cameraCount,
+        guests: guestCount,
+        items_checked: checked,
+        total_items: totalItems,
+        items_skipped: skipped,
+        duration_minutes: elapsed,
+        completion_rate: Math.round(checked / totalItems * 100) + '%',
+        timestamp: new Date().toISOString(),
+        source: 'L3 Studio Hub'
+      })
+    }).catch(() => {});
+  }
+
+  showScreen('complete');
+}
+
+// ── History ──
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem('l3-studio-history') || '[]');
+  const container = document.getElementById('history-list');
+  if (history.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg><use href="#icon-clipboard"/></svg></div><p>No sessions logged yet.</p><p style="margin-top:8px;font-size:13px;">Completed checklists will appear here.</p></div>';
+    return;
+  }
+  container.innerHTML = history.map(h => {
+    const ratePct = h.completion_rate ? parseInt(h.completion_rate) : Math.round(h.itemsChecked / h.totalItems * 100);
+    const rate = ratePct + '%';
+    const rateClass = ratePct >= 100 ? 'rate-full' : 'rate-partial';
+    const typeClass = (h.sessionType || 'In-Studio') === 'On-Location' ? 'location' : 'studio';
+    const typeLabel = h.sessionType || 'In-Studio';
+    const sessionName = h.session && h.session !== h.client ? h.session : '';
+    return `<div class="history-item">
+      <div class="history-item-header">
+        <div style="min-width:0;">
+          <div class="history-item-client">${h.client}</div>
+          ${sessionName ? `<div style="font-size:12px;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sessionName}</div>` : ''}
+        </div>
+        <div class="history-item-badges">
+          <span class="history-badge ${typeClass}">${typeLabel}</span>
+          <span class="history-badge ${rateClass}">${rate}</span>
+        </div>
+      </div>
+      <div class="history-item-meta">
+        <span>${h.producer}</span>
+        <span>${h.cameras} cam${h.cameras > 1 ? 's' : ''}</span>
+        <span>${h.duration}m</span>
+        <span>${h.date} ${h.time}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
