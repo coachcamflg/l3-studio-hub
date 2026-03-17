@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3 Media Studio Hub — Protected</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#0A0A0A; color:#e0e0e0; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.gate { background:#111; border:1px solid #1A1A1A; border-radius:16px; padding:48px; max-width:420px; width:90%; text-align:center; }
+.gate h1 { font-size:24px; font-weight:800; color:#fff; margin-bottom:8px; }
+.gate p { font-size:14px; color:#888; margin-bottom:32px; }
+.gate input { width:100%; padding:14px 16px; border-radius:10px; border:1px solid #1A1A1A; background:#0A0A0A; color:#fff; font-size:15px; font-family:'Inter',sans-serif; margin-bottom:16px; outline:none; transition:border-color 0.3s; }
+.gate input:focus { border-color:#6E2649; }
+.gate button { width:100%; padding:14px; border-radius:10px; border:none; background:#6E2649; color:#fff; font-size:15px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:opacity 0.3s; }
+.gate button:hover { opacity:0.85; }
+.error { color:#ff4444; font-size:13px; margin-top:12px; display:none; }
+.badge { display:inline-block; padding:6px 16px; border-radius:50px; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; background:rgba(110,38,73,0.15); color:#6E2649; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<div class="gate">
+  <div class="badge">FORWARD LEARNING GROUP</div>
+  <h1>L3 Media Studio Hub</h1>
+  <p>This strategy document is protected. Enter your access code to continue.</p>
+  <input type="password" id="pw" placeholder="Enter access code" onkeydown="if(event.key==='Enter')checkPw()">
+  <button onclick="checkPw()">Access Strategy</button>
+  <div class="error" id="err">Incorrect access code. Please try again.</div>
+</div>
+<script>
+const HASH = 'cdbb6a2981650aa4ed27a04841cb4270aa871bbb874488e4338ce9ba1176bcd9';
+const TARGET = 'hub.html';
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPw() {
+  const h = await sha256(document.getElementById('pw').value);
+  if (h === HASH) { sessionStorage.setItem('access','granted'); window.location.href=TARGET; }
+  else { const e=document.getElementById('err'); e.style.display='block'; setTimeout(()=>e.style.display='none',3000); }
+}
+if (sessionStorage.getItem('access')==='granted') window.location.href=TARGET;
+</script>
+</body>
+</html>
